@@ -284,4 +284,117 @@ describe('Promise', () => {
       });
     });
   });
+
+  describe('$reject', () => {
+    it('pending to rejected', () => {
+      return Promise.reject(0).should.be.rejected();
+    });
+
+    it('catch the reason via #catch, the reason is 0', () => {
+      return Promise.reject(0).catch(reason => {
+        reason.should.be.equal(0);
+      });
+    });
+
+    it('catch the reason via #then, the reason is 0', () => {
+      return Promise.reject(0).then(null, reason => {
+        reason.should.be.equal(0);
+      });
+    });
+  });
+
+  describe('$resolve', () => {
+    it('pending to fulfilled', () => {
+      return Promise.resolve(0).should.be.fulfilled();
+    });
+
+    it('resolve the value is 0', () => {
+      return Promise.resolve(0).then(value => {
+        value.should.be.equal(0);
+      });
+    });
+
+    it('pass a Promise parameter and return the value is 0', () => {
+      return Promise.resolve(fulfilledPromise).then(value => {
+        value.should.be.equal(0);
+      });
+    });
+  });
+
+  describe('$race', () => {
+    it('pass [0, 1] parameters and resolve the value is 0', () => {
+      return Promise.race([0, 1]).then(value => {
+        value.should.be.equal(0);
+      });
+    });
+
+    it('pass [Promise.reject(0), 1] parameters and reject the reason is 0', () => {
+      return Promise.race([Promise.reject(0), 1]).catch(reason => {
+        reason.should.be.equal(0);
+      });
+    });
+
+    it('pass Promises parameters and resolve the reason is 0', () => {
+      return Promise.race([pendingFulfilledPromise, fulfilledPromise]).then(value => {
+        value.should.be.equal(0);
+      });
+    });
+  });
+
+  describe('$all', () => {
+    it('must be provided an Array', () => {
+      return Promise.all(0).catch(reason => {
+        reason.should.be.Error();
+        (() => { throw reason; }).should.throw('Promise.all must be provided an Array');
+      });
+    });
+
+    it('pass [0, 1] parameters and resolve the values is [0, 1]', () => {
+      return Promise.all([0, 1]).then(values => {
+        values.should.be.eql([0, 1]);
+      });
+    });
+
+    it('pass Promises parameters and resolve the values is [0, 1]', () => {
+      return Promise.all([Promise.resolve(0), Promise.resolve(1)]).then(values => {
+        values.should.be.eql([0, 1]);
+      });
+    });
+
+    it('pass delay Promises parameters and resolve the values is [100, 50, 70]', () => {
+      return Promise.all([new Promise(resolve => {
+        setTimeout(() => {
+          resolve(100);
+        }, 100);
+      }), new Promise(resolve => {
+        setTimeout(() => {
+          resolve(50);
+        }, 50);
+      }), new Promise(resolve => {
+        setTimeout(() => {
+          resolve(70);
+        }, 70);
+      })]).then(values => {
+        values.should.be.eql([100, 50, 70]);
+      });
+    });
+
+    it('pass delay Promises parameters and reject the reason is 70', () => {
+      return Promise.all([new Promise(resolve => {
+        setTimeout(() => {
+          resolve(100);
+        }, 100);
+      }), new Promise(resolve => {
+        setTimeout(() => {
+          resolve(50);
+        }, 50);
+      }), new Promise((resolve, reject) => {
+        setTimeout(() => {
+          reject(70);
+        }, 70);
+      })]).catch(reason => {
+        reason.should.be.equal(70);
+      });
+    });
+  });
 });
