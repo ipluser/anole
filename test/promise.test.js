@@ -322,6 +322,13 @@ describe('Promise', () => {
   });
 
   describe('$race', () => {
+    it('must be provided an Array', () => {
+      return Promise.race(0).catch(reason => {
+        reason.should.be.Error();
+        (() => { throw reason; }).should.throw('Promise.race must be provided an Array');
+      });
+    });
+
     it('pass [0, 1] parameters and resolve the value is 0', () => {
       return Promise.race([0, 1]).then(value => {
         value.should.be.equal(0);
